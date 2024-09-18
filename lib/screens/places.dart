@@ -16,39 +16,39 @@ class PlacesScreen extends ConsumerStatefulWidget {
 }
 
 class _PlacesScreenState extends ConsumerState<PlacesScreen> {
-  final GlobalKey _addedKey = GlobalKey();
-  late Future<void> _placesFuture;
+  final GlobalKey _addedKey = GlobalKey(); // Key for the "Add" button, used in the tutorial
+  late Future<void> _placesFuture; // Future to load places data
 
   @override
   void initState() {
     super.initState();
-    _checkAndShowTutorial(); // استدعاء الدالة للتحقق من عرض التعليمات
-    _placesFuture = ref.read(userPlacesProvider.notifier).loadedPlaces();
+    _checkAndShowTutorial(); // Call to check if the tutorial should be displayed
+    _placesFuture = ref.read(userPlacesProvider.notifier).loadedPlaces(); // Load places from provider
   }
 
-  // التحقق من إذا كان يجب عرض التعليمات
+  // Check if this is the user's first time on the screen and show the tutorial if needed
   Future<void> _checkAndShowTutorial() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool isFirstTime = prefs.getBool('isFirstTimePlacesScreen') ?? true;
+    bool isFirstTime = prefs.getBool('isFirstTimePlacesScreen') ?? true; // Check if it's the user's first visit
 
     if (isFirstTime) {
-      _createTutorial();
-      await prefs.setBool('isFirstTimePlacesScreen', false);
+      _createTutorial(); // Create and show the tutorial
+      await prefs.setBool('isFirstTimePlacesScreen', false); // Mark that the tutorial has been shown
     }
   }
 
-  // إنشاء التعليمات
+  // Create and display the tutorial
   Future<void> _createTutorial() async {
     final targets = [
       TargetFocus(
-        identify: 'floatingButton',
-        keyTarget: _addedKey,
-        alignSkip: Alignment.topCenter,
+        identify: 'floatingButton', // Identifier for the target
+        keyTarget: _addedKey, // Key to focus the "Add" button
+        alignSkip: Alignment.topCenter, // Skip button position
         contents: [
           TargetContent(
-            align: ContentAlign.bottom,
+            align: ContentAlign.bottom, // Position of the tutorial text
             builder: (context, controller) => Text(
-              'Use this button to add new Place to the list',
+              'Use this button to add new Place to the list', // Instruction for the user
               style: Theme.of(context)
                   .textTheme
                   .titleLarge
@@ -60,9 +60,10 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
     ];
 
     final tutorial = TutorialCoachMark(
-      targets: targets,
+      targets: targets, // Define the tutorial targets
     );
 
+    // Display the tutorial after a short delay
     Future.delayed(const Duration(milliseconds: 500), () {
       tutorial.show(context: context);
     });
@@ -70,16 +71,17 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userPlaces = ref.watch(userPlacesProvider);
+    final userPlaces = ref.watch(userPlacesProvider); // Watch the userPlacesProvider for changes
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Places'),
+        title: const Text('Your Places'), // AppBar title
         actions: [
           IconButton(
-            key: _addedKey,
-            icon: const Icon(Icons.add),
+            key: _addedKey, // Key for the "Add" button
+            icon: const Icon(Icons.add), // Icon for the button
             onPressed: () {
+              // Navigate to the AddPlaceScreen when the button is pressed
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (ctx) => const AddPlaceScreen(),
@@ -90,14 +92,14 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0), // Padding for the content
         child: FutureBuilder(
-          future: _placesFuture,
+          future: _placesFuture, // Future that loads the places
           builder: (context, snapshot) => snapshot.connectionState ==
-              ConnectionState.waiting
-              ? const Center(child: CircularProgressIndicator())
+              ConnectionState.waiting // Check if the data is still loading
+              ? const Center(child: CircularProgressIndicator()) // Show a loading spinner while waiting
               : PlacesList(
-            places: userPlaces,
+            places: userPlaces, // Display the list of places
           ),
         ),
       ),
